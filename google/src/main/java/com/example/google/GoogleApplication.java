@@ -82,7 +82,7 @@ class AssistantController {
         this.ai = ai
                 .defaultSystem(system)
                 .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore))
-                .defaultTools(new SyncMcpToolCallbackProvider(client))
+                .defaultToolCallbacks(new SyncMcpToolCallbackProvider(client))
                 .build();
     }
 

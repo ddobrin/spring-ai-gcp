@@ -1,27 +1,27 @@
 package com.example.google;
 
+import io.modelcontextprotocol.client.McpClient;
+import io.modelcontextprotocol.client.McpSyncClient;
+import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,25 +33,13 @@ public class GoogleApplication {
         SpringApplication.run(GoogleApplication.class, args);
     }
 
-}
-
-record Appointment(String date) {
-}
-
-// TBD MCP?
-@Component
-class DogAdoptionsScheduler {
-
-    @Tool(description = "schedule an appointment to pickup or adopt a dog at a Pooch Palace location")
-    Appointment scheduleAppointment(@ToolParam(description = "the id of the dog") String dogId,
-                                    @ToolParam(description = "the name of the dog") String dogName) {
-        var i = Instant
-                .now()
-                .plus(3, ChronoUnit.DAYS)
-                .toString();
-        var a = new Appointment(i);
-        System.out.println("scheduled appointment for " + a.date() + " for dog " + dogName + " with id " + dogId + ".");
-        return a;
+    @Bean
+    McpSyncClient mcpSyncClient() {
+        var mcp = McpClient
+                .sync(new HttpClientSseClientTransport("http://localhost:8081"))
+                .build();
+        mcp.initialize();
+        return mcp;
     }
 }
 
@@ -70,7 +58,7 @@ class AssistantController {
 
     private final Map<String, PromptChatMemoryAdvisor> advisors = new ConcurrentHashMap<>();
 
-    AssistantController(JdbcClient db, DogRepository repository, DogAdoptionsScheduler scheduler, ChatClient.Builder ai, VectorStore vectorStore) {
+    AssistantController(JdbcClient db, DogRepository repository, McpSyncClient client, ChatClient.Builder ai, VectorStore vectorStore) {
 
         if (db.sql("select count(*) from vector_store").query(Integer.class).single().equals(0)) {
             repository.findAll().forEach(d -> {
@@ -94,7 +82,7 @@ class AssistantController {
         this.ai = ai
                 .defaultSystem(system)
                 .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore))
-                .defaultTools(scheduler)
+                .defaultTools(new SyncMcpToolCallbackProvider(client))
                 .build();
     }
 

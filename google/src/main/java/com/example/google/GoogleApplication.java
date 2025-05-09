@@ -6,7 +6,8 @@ import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
-import org.springframework.ai.chat.memory.InMemoryChatMemory;
+import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -72,6 +73,7 @@ class AssistantController {
         // http :8080/jlong/inquire question=="do you have any neurotic dogs?"
         // http :8080/jlong/inquire question=="fantastic. when can i schedule an appointmnet to pick up Prancer from the Mountain View location?"
 
+
         var system = """
                 You are an AI powered assistant to help people adopt a dog from the adoption\s
                 agency named Pooch Palace with locations in Mountain View, Seoul, Tokyo, Singapore, Paris,\s
@@ -88,8 +90,9 @@ class AssistantController {
 
     @GetMapping("/{user}/inquire")
     String inquire(@PathVariable String user, @RequestParam String question) {
+        var c = MessageWindowChatMemory.builder().chatMemoryRepository(new InMemoryChatMemoryRepository()).build();
         var advisor = this.advisors
-                .computeIfAbsent(user, _ -> PromptChatMemoryAdvisor.builder(new InMemoryChatMemory()).build());
+                .computeIfAbsent(user, _ -> PromptChatMemoryAdvisor.builder(c).build());
         // tbd changes in > m8
         return this.ai
                 .prompt()

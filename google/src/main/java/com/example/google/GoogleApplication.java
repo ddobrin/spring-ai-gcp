@@ -37,7 +37,7 @@ public class GoogleApplication {
     @Bean
     McpSyncClient mcpSyncClient() {
         var mcp = McpClient
-                .sync(new HttpClientSseClientTransport("http://localhost:8081"))
+                .sync( HttpClientSseClientTransport.builder("http://localhost:8081").build())
                 .build();
         mcp.initialize();
         return mcp;

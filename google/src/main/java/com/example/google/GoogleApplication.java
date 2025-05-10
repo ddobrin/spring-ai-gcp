@@ -89,7 +89,8 @@ class AssistantController {
     }
 
     @GetMapping("/{user}/inquire")
-    String inquire(@PathVariable String user, @RequestParam String question) {
+    String inquire(@PathVariable String user,
+                   @RequestParam String question) {
         var c = MessageWindowChatMemory.builder().chatMemoryRepository(new InMemoryChatMemoryRepository()).build();
         var advisor = this.advisors
                 .computeIfAbsent(user, _ -> PromptChatMemoryAdvisor.builder(c).build());

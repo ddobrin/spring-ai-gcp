@@ -15,4 +15,4 @@ INSERT INTO dog(id, name, description) values (5, 'Daisy', 'A spotted Poodle kno
 INSERT INTO dog(id, name, description) values (95, 'Mia', 'A grey Great Dane known for being loyal.');
 INSERT INTO dog(id, name, description) values (71, 'Molly', 'A golden Chihuahua known for being curious.');
 INSERT INTO dog(id, name, description) values (65, 'Ruby', 'A white Great Dane known for being protective.');
-INSERT INTO dog(id, name, description) values (45, 'Prancer', 'A demonic, neurotic, man hating, animal hating, children hating dogs that look like a gremlin.');
+INSERT INTO dog(id, name, description) values (45, 'Prancer', 'A silly, goofy dog who slobbers all over everyone');

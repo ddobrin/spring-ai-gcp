@@ -111,7 +111,7 @@ INSERT INTO dog(id, name, description) values (5, 'Daisy', 'A spotted Poodle kno
 INSERT INTO dog(id, name, description) values (95, 'Mia', 'A grey Great Dane known for being loyal.');
 INSERT INTO dog(id, name, description) values (71, 'Molly', 'A golden Chihuahua known for being curious.');
 INSERT INTO dog(id, name, description) values (65, 'Ruby', 'A white Great Dane known for being protective.');
-INSERT INTO dog(id, name, description) values (45, 'Prancer', 'A demonic, neurotic, man hating, animal hating, children hating dogs that look like a gremlin.');
+INSERT INTO dog(id, name, description) values (45, 'Prancer', 'A silly, goofy dog who slobbers all over everyone');
 ```
 
 Nice! tgis will get run on every retart. were taking care to avoid duplicate data bu just dropping the table on every restart and re-inserting the same rows. if this were a real databsae, we might use an _upsert_, which PostgresSQL supports with its `insert on conflict... do` syntax. 
@@ -217,7 +217,7 @@ it should confirm that your name is Bob. and it might even try to keep yo on tra
 fine. let's see what else it can do. ask it:
 
 ```shell
-http :8080/dogs/inquire question=="do you have any neurotic dogs?" 
+http :8080/dogs/inquire question=="do you have any silly dogs?" 
 ```
 
 it will respond that it doesn't have any information about dogs in any Pooch Palace location, and maybe encourage you to check the local listings. The problem is that it doesn't have access to the data. So let's give it access! but we shouldn't give it _all_ of the data. i mean.. we _could_, perhaps, give it all the data. there's only records in this prticular database, after all! did you know that google gemini 2.5 pro has a 1 _million_ token size? all LLMs have this concept of _tokens_ - an approximatino for the amount of data consumed and produced by an LLM. If you're using a local model like  the open Gemma model, which you cna run locally, then the only cost to runnning a model is the complexity and CPU cost. If you run a hosted, and vastly superior model like Gemini, then there's also an a dollars-and-cents cost. so, even thgough you _could_ send all the data along your request to one of these models, you should try to limit the data you send. It's the principle of the thing! so we'll store everything in a vector store and the find things that might be potentially germaine to the content we're looking for, and finally we'll transmit only that data to the model for consideration. this process, of sourcing data from a database and then using that date to inform the response produced by a model is called _retreival augmented generation_ (or R.A.G.). Let's modify teh code to supprt it. 
@@ -249,10 +249,10 @@ all we're doing is checking that there are no existing records written to the `v
 Run the program and ask again: 
 
 ```shell
-http :8080/jlong/inquire question=="do you have any neurotic dogs?" 
+http :8080/jlong/inquire question=="do you have any silly dogs?" 
 ```
 
-this time, it should respond that indeed there's a neurotic dog named _Prancer_ (hi, buddy!) in the shlter who might be just the dog for us! Huzzah! 
+this time, it should respond that indeed there's a silly dog named _Prancer_ (hi, buddy!) in the shlter who might be just the dog for us! Huzzah! 
 
 Well, anturallt the next thing we'll want to do is adopt this doggo of joy. but when might we stop by to adopt and pickup this dog? we'll need to connect our LLM to the patent-pending, world-leading schedulign algorithm. here's the implementation of the scheduling logic. 
 
@@ -349,13 +349,13 @@ Restart the application and try the interaction, again.
 
 ```shell
 
-  http :8080/dogs/jlong/inquire question=="do you have any neurotic dogs?" 
+  http :8080/dogs/jlong/inquire question=="do you have any silly dogs?" 
 ```
 
 and 
 
 ```shell
-http :8080/dogs/jlong/inquire question=="do you have any neurotic dogs?"
+http :8080/dogs/jlong/inquire question=="do you have any silly dogs?"
 ```
 
 and
